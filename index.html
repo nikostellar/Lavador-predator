@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavados Predator | Drift Clean · Actitud Pesada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --predator-red: #ff1a1a;
+            --predator-dark: #0a0a0a;
+            --predator-black: #050505;
+            --neon-green: #00ff88;
+            --neon-red: #ff0040;
+            --text-white: #ffffff;
+            --text-gray: #b0b0b0;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--predator-black);
+            color: var(--text-white);
+            overflow-x: hidden;
+            cursor: none;
+        }
+        .cursor {
+            width: 20px; height: 20px;
+            border: 2px solid var(--predator-red);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s, background 0.3s;
+            mix-blend-mode: difference;
+        }
+        .cursor.hover {
+            transform: scale(2);
+            background: rgba(255, 26, 26, 0.3);
+        }
+        .cursor-dot {
+            width: 4px; height: 4px;
+            background: var(--predator-red);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 26, 26, 0.3);
+            transition: all 0.3s;
+        }
+        nav.scrolled { padding: 15px 50px; background: rgba(5, 5, 5, 0.95); }
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--predator-red);
+            text-shadow: 0 0 20px rgba(255, 26, 26, 0.5);
+            letter-spacing: 3px;
+        }
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+        .nav-links a {
+            color: var(--text-white);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute;
+            bottom: -5px; left: 0;
+            width: 0; height: 2px;
+            background: var(--predator-red);
+            transition: width 0.3s;
+        }
+        .nav-links a:hover { color: var(--predator-red); }
+        .nav-links a:hover::after { width: 100%; }
+        #hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #particles-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+        .hero-content { position: relative; z-index: 2; text-align: center; padding: 0 20px; }
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .hero-title .line1 {
+            display: block;
+            background: linear-gradient(135deg, #fff 0%, #ff1a1a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glitch 3s infinite;
+        }
+        .hero-title .line2 {
+            display: block;
+            color: var(--predator-red);
+            text-shadow: 0 0 10px rgba(255, 26, 26, 0.8), 0 0 40px rgba(255, 26, 26, 0.4), 0 0 80px rgba(255, 26, 26, 0.2);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        .hero-subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            letter-spacing: 8px;
+            color: var(--text-gray);
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+        .hero-cta {
+            display: inline-block;
+            padding: 18px 50px;
+            background: transparent;
+            border: 2px solid var(--predator-red);
+            color: var(--text-white);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .hero-cta::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 26, 26, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        .hero-cta:hover::before { left: 100%; }
+        .hero-cta:hover {
+            background: var(--predator-red);
+            box-shadow: 0 0 30px rgba(255, 26, 26, 0.5);
+            transform: translateY(-3px);
+        }
+        .car-float {
+            position: absolute;
+            bottom: 10%; left: 50%;
+            transform: translateX(-50%);
+            width: 600px; height: 200px;
+            z-index: 1;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-20px); }
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: bounce 2s infinite;
+        }
+        .scroll-indicator span { font-size: 0.8rem; letter-spacing: 3px; color: var(--text-gray); }
+        .scroll-line { width: 1px; height: 60px; background: linear-gradient(to bottom, var(--predator-red), transparent); }
+        @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+        section { padding: 120px 50px; position: relative; }
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--predator-red), transparent);
+        }
+        #servicios { background: linear-gradient(180deg, var(--predator-black) 0%, #0f0f0f 100%); }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .service-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 26, 26, 0.2);
+            border-radius: 20px;
+            padding: 50px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+        }
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255, 26, 26, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .service-card:hover::before { opacity: 1; }
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--predator-red);
+            box-shadow: 0 20px 60px rgba(255, 26, 26, 0.2);
+        }
+        .service-icon { font-size: 4rem; margin-bottom: 20px; display: block; }
+        .service-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .service-price {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            margin-bottom: 20px;
+        }
+        .service-features { list-style: none; color: var(--text-gray); font-size: 1rem; line-height: 2; }
+        .service-features li::before { content: '▸ '; color: var(--predator-red); }
+        #proceso { background: var(--predator-dark); overflow: hidden; }
+        .process-timeline { max-width: 1000px; margin: 0 auto; position: relative; }
+        .process-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px; height: 100%;
+            background: linear-gradient(to bottom, var(--predator-red), transparent);
+        }
+        .process-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 80px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s;
+        }
+        .process-step.visible { opacity: 1; transform: translateY(0); }
+        .process-step:nth-child(even) { flex-direction: row-reverse; }
+        .process-step:nth-child(even) .step-content { text-align: right; }
+        .step-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            color: rgba(255, 26, 26, 0.2);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        .step-content {
+            width: 45%;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 26, 26, 0.2);
+            border-radius: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        .step-content h3 { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--predator-red); margin-bottom: 10px; }
+        .step-content p { color: var(--text-gray); line-height: 1.6; }
+        #musica { background: var(--predator-black); padding: 80px 0; overflow: hidden; }
+        .visualizer-container {
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+            padding: 0 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .bar {
+            width: 8px;
+            background: linear-gradient(to top, var(--predator-red), var(--neon-red));
+            border-radius: 4px 4px 0 0;
+            animation: equalize 1s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(255, 26, 26, 0.5);
+        }
+        @keyframes equalize {
+            0%, 100% { height: 20px; }
+            50% { height: var(--target-height); }
+        }
+        .music-text {
+            text-align: center;
+            margin-top: 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            color: var(--text-gray);
+        }
+        #galeria { background: linear-gradient(180deg, #0f0f0f 0%, var(--predator-black) 100%); }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            transition: all 0.4s;
+        }
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 60px rgba(255, 26, 26, 0.3);
+        }
+        .gallery-item::after {
+            content: 'DRIFT';
+            position: absolute;
+            bottom: 20px; left: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--predator-red);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .gallery-item:hover::after { opacity: 1; }
+        #contacto { background: var(--predator-dark); text-align: center; }
+        .contact-content { max-width: 800px; margin: 0 auto; }
+        .contact-title { font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 30px; }
+        .contact-title span { color: var(--predator-red); }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 30px 0;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .whatsapp-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .whatsapp-btn:hover::before { width: 300px; height: 300px; }
+        .whatsapp-btn:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(37, 211, 102, 0.4); }
+        .contact-info { margin-top: 40px; color: var(--text-gray); font-size: 1.1rem; line-height: 2; }
+        footer { background: var(--predator-black); padding: 40px; text-align: center; border-top: 1px solid rgba(255, 26, 26, 0.2); }
+        footer p { color: var(--text-gray); font-size: 0.9rem; letter-spacing: 2px; }
+        footer .predator { color: var(--predator-red); font-family: 'Orbitron', sans-serif; font-weight: 900; }
+        @media (max-width: 768px) {
+            nav { padding: 15px 20px; }
+            .nav-links { display: none; }
+            section { padding: 80px 20px; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .process-timeline::before { left: 20px; }
+            .process-step, .process-step:nth-child(even) { flex-direction: column; padding-left: 60px; }
+            .process-step:nth-child(even) .step-content { text-align: left; }
+            .step-content { width: 100%; }
+            .step-number { left: 20px; transform: translateX(-50%); }
+            .car-float { width: 300px; height: 100px; }
+        }
+        .loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--predator-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        .loader.hidden { opacity: 0; visibility: hidden; }
+        .loader-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--predator-red);
+            animation: loaderPulse 1s ease-in-out infinite;
+        }
+        @keyframes loaderPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .lightning {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0;
+        }
+        .lightning.flash { animation: lightningFlash 0.2s ease-out; }
+        @keyframes lightningFlash {
+            0% { opacity: 0; }
+            10% { opacity: 0.8; background: rgba(255, 26, 26, 0.2); }
+            20% { opacity: 0; }
+            30% { opacity: 0.4; background: rgba(255, 26, 26, 0.1); }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader"><div class="loader-text">LAVADOS PREDATOR</div></div>
+    <div class="lightning" id="lightning"></div>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursor-dot"></div>
+    
+    <nav id="navbar">
+        <div class="logo">PREDATOR</div>
+        <ul class="nav-links">
+            <li><a href="#hero">Inicio</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#proceso">Proceso</a></li>
+            <li><a href="#galeria">Galería</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+        </ul>
+    </nav>
+    
+    <section id="hero">
+        <canvas id="particles-canvas"></canvas>
+        <svg class="car-float" viewBox="0 0 600 200" fill="none">
+            <path d="M50 120 L30 100 L50 80 L100 60 L250 50 L400 55 L520 70 L550 90 L560 110 L540 130 L480 140 L420 135 L380 140 L320 135 L280 140 L220 135 L180 140 L120 135 L80 140 L60 130 Z" fill="#1a1a1a" stroke="#ff1a1a" stroke-width="2"/>
+            <path d="M120 65 L220 58 L350 60 L420 68 L400 85 L300 80 L200 82 L130 78 Z" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+            <ellipse cx="150" cy="130" rx="35" ry="35" fill="#0a0a0a" stroke="#ff1a1a" stroke-width="3"/>
+            <ellipse cx="150" cy="130" rx="20" ry="20" fill="#1a1a1a" stroke="#666" stroke-width="2"/>
+            <ellipse cx="450" cy="130" rx="35" ry="35" fill="#0a0a0a" stroke="#ff1a1a" stroke-width="3"/>
+            <ellipse cx="450" cy="130" rx="20" ry="20" fill="#1a1a1a" stroke="#666" stroke-width="2"/>
+            <path d="M20 85 L50 75 L60 80 L30 90 Z" fill="#2a2a2a" stroke="#ff1a1a" stroke-width="2"/>
+            <circle cx="530" cy="95" r="8" fill="#ffffcc" stroke="#ffcc00" stroke-width="2"/>
+            <circle cx="40" cy="105" r="6" fill="#ff0040" stroke="#cc0033" stroke-width="2"/>
+            <circle cx="120" cy="160" r="15" fill="#666" opacity="0.6"/>
+            <circle cx="100" cy="170" r="20" fill="#888" opacity="0.4"/>
+            <circle cx="140" cy="165" r="12" fill="#555" opacity="0.5"/>
+            <circle cx="480" cy="160" r="15" fill="#666" opacity="0.6"/>
+            <circle cx="460" cy="170" r="20" fill="#888" opacity="0.4"/>
+            <circle cx="500" cy="165" r="12" fill="#555" opacity="0.5"/>
+        </svg>
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="line1">LAVADOS</span>
+                <span class="line2">PREDATOR</span>
+            </h1>
+            <p class="hero-subtitle">Drift Clean · Actitud Pesada</p>
+            <a href="#contacto" class="hero-cta">AGENDA TU LAVADO</a>
+        </div>
+        <div class="scroll-indicator">
+            <span>SCROLL</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+    
+    <section id="servicios">
+        <h2 class="section-title">SERVICIOS</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <span class="service-icon">🚗</span>
+                <h3 class="service-name">EXTERIOR COMPLETO</h3>
+                <div class="service-price">$8.000</div>
+                <ul class="service-features">
+                    <li>Lavado exterior profundo</li>
+                    <li>Shampoo especial</li>
+                    <li>Esponjas suaves</li>
+                    <li>Secado con toalla 100% algodón</li>
+                    <li>Limpieza de llantas</li>
+                </ul>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">🚗✨</span>
+                <h3 class="service-name">EXTERIOR + INTERIOR</h3>
+                <div class="service-price">$12.000</div>
+                <ul class="service-features">
+                    <li>Todo el servicio exterior</li>
+                    <li>Aspirado interior completo</li>
+                    <li>Limpieza de tablero y consola</li>
+                    <li>Acondicionador de plásticos</li>
+                    <li>Limpieza de vidrios interiores</li>
+                    <li>Aromatización</li>
+                </ul>
+            </div>
+            <div class="service-card">
+                <span class="service-icon">⭐</span>
+                <h3 class="service-name">PAQUETE PREMIUM</h3>
+                <div class="service-price">$15.000</div>
+                <ul class="service-features">
+                    <li>Todo el servicio completo</li>
+                    <li>Encerado de carrocería</li>
+                    <li>Brillo extra</li>
+                    <li>Protección UV</li>
+                    <li>Tratamiento de cuero</li>
+                    <li>Shampoo de motor</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    
+    <section id="proceso">
+        <h2 class="section-title">NUESTRO PROCESO</h2>
+        <div class="process-timeline">
+            <div class="process-step">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h3>EVALUACIÓN</h3>
+                    <p>Inspeccionamos tu vehículo para identificar las necesidades específicas de limpieza y el estado de la pintura.</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h3>PREPARACIÓN</h3>
+                    <p>Aplicamos shampoo especial y dejamos actuar para ablandar la suciedad sin dañar la pintura.</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h3>LIMPIEZA PROFUNDA</h3>
+                    <p>Utilizamos esponjas suaves de microfibra y técnicas de dos cubetas para evitar rayones en la carrocería.</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="step-number">04</div>
+                <div class="step-content">
+                    <h3>SECADO PERFECTO</h3>
+                    <p>Secamos con toallas de algodón 100% de alta absorción, sin dejar marcas ni residuos de agua.</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="step-number">05</div>
+                <div class="step-content">
+                    <h3>DETALLES FINALES</h3>
+                    <p>Revisamos cada rincón, limpiamos llantas, vidrios y aplicamos los acabados finales para un brillo espectacular.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="musica">
+        <div class="visualizer-container" id="visualizer"></div>
+        <p class="music-text">DRIFT CLEAN · ACTITUD PESADA · BAJO Y POTENCIA</p>
+    </section>
+    
+    <section id="galeria">
+        <h2 class="section-title">GALERÍA</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item">🚗</div>
+            <div class="gallery-item">✨</div>
+            <div class="gallery-item">🧽</div>
+            <div class="gallery-item">💦</div>
+            <div class="gallery-item">🎸</div>
+            <div class="gallery-item">🏎️</div>
+        </div>
+    </section>
+    
+    <section id="contacto">
+        <div class="contact-content">
+            <h2 class="contact-title">AGENDA TU <span>LAVADO</span></h2>
+            <p style="color: var(--text-gray); font-size: 1.2rem; margin-bottom: 20px;">
+                ¿Listo para darle a tu auto el trato que se merece?<br>
+                Contáctanos por WhatsApp y agenda tu hora.
+            </p>
+            <a href="https://wa.me/56994454081?text=Hola!%20Quiero%20agendar%20un%20lavado%20de%20auto%20con%20Lavados%20Predator" class="whatsapp-btn" target="_blank">
+                <span>📱</span> WhatsApp +56 9 9445 4081
+            </a>
+            <div class="contact-info">
+                <p>📍 Temuco - Labranza, Chile</p>
+                <p>🕐 Horario: Lunes a Sábado, 9:00 - 19:00 hrs</p>
+                <p>✓ Shampoo especial · ✓ Esponjas suaves · ✓ Toallas 100% algodón</p>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <p>© 2026 <span class="predator">LAVADOS PREDATOR</span> · DRIFT CLEAN · ACTITUD PESADA</p>
+    </footer>
+    
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => { document.getElementById('loader').classList.add('hidden'); }, 1500);
+        });
+        
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursor-dot');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+            cursorDot.style.left = e.clientX - 2 + 'px';
+            cursorDot.style.top = e.clientY - 2 + 'px';
+        });
+        document.querySelectorAll('a, .service-card, .gallery-item').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+        
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+        
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = (Math.random() - 0.5) * 2;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.color = Math.random() > 0.5 ? '255, 26, 26' : '255, 255, 255';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        const particles = [];
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => { particle.update(); particle.draw(); });
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(255, 26, 26, ${0.1 * (1 - distance / 150)})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+        
+        const visualizer = document.getElementById('visualizer');
+        const barCount = 50;
+        for (let i = 0; i < barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.setProperty('--target-height', Math.random() * 250 + 50 + 'px');
+            bar.style.animationDelay = (i * 0.05) + 's';
+            bar.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+            visualizer.appendChild(bar);
+        }
+        
+        const observerOptions = { threshold: 0.3, rootMargin: '0px 0px -100px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, observerOptions);
+        document.querySelectorAll('.process-step').forEach(step => observer.observe(step));
+        
+        document.addEventListener('click', () => {
+            const lightning = document.getElementById('lightning');
+            lightning.classList.add('flash');
+            setTimeout(() => lightning.classList.remove('flash'), 200);
+        });
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+        
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            document.querySelectorAll('.gallery-item').forEach((el, index) => {
+                const speed = 0.5 + (index * 0.1);
+                el.style.transform = `translateY(${-(scrolled * speed)}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
